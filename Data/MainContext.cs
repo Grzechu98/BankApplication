@@ -19,7 +19,7 @@ namespace BankApplication.Data
 
         public MainContext(IConfiguration config)
         {
-            _config = config;
+            _config = config; 
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
