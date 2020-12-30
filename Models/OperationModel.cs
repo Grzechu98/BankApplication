@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,7 +17,9 @@ namespace BankApplication.Models
         public int? RecipientId { get; set; }
         public int SenderId { get; set; }
 
+        [ForeignKey("RecipientId")]
         public virtual BankAccountModel Recipient { get; set; }
+        [ForeignKey("SenderId")]
         public virtual BankAccountModel Sender { get; set; }
 
 

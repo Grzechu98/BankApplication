@@ -1,4 +1,6 @@
-﻿namespace BankApplication.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BankApplication.Models
 {
     public class AccountSettings
     {
@@ -7,6 +9,7 @@
         public decimal SingleOperationLimit { get; set; }
         public decimal DailyOperationLimit { get; set; }
         public int BankAccountId { get; set; }
+        [ForeignKey("BankAccountId")]
         public virtual BankAccountModel BankAccount { get; set; }
 
     }
