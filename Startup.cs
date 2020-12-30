@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Buffers;
 using Newtonsoft.Json.Serialization;
+using BankApplication.Services;
 
 namespace BankApplication
 {
@@ -70,6 +71,9 @@ namespace BankApplication
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"])) 
                 };
             });
+
+            services.AddTransient<IEncrypter, Encrypter>();
+            services.AddScoped<ITokenService, TokenService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

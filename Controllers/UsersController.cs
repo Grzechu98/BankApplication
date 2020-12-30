@@ -7,6 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BankApplication.Data;
 using BankApplication.Models;
+using BankApplication.Services;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace BankApplication.Controllers
 {
@@ -15,18 +22,48 @@ namespace BankApplication.Controllers
     public class UsersController : ControllerBase
     {
         private readonly MainContext _context;
+        private readonly IEncrypter _encrypter;
+        private readonly ITokenService _tokenService;
 
-        public UsersController(MainContext context)
+        public UsersController(MainContext context, IEncrypter encrypter, ITokenService tokenService)
         {
             _context = context;
+            _encrypter = encrypter;
+            _tokenService = tokenService;
+        }
+        [HttpPost("login")]
+        public async Task<ActionResult<UserModel>> Login([FromBody] JObject data)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(a => a.Login == data["login"].ToString());
+            var password = _encrypter.EncryptData(data["password"].ToString());
+            if (user != null && user.Password == password)
+            {
+                var token = await _tokenService.GetToken(user.Id);
+
+                return Ok(new
+                {
+                    user = user,
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    expiration = token.ValidTo
+                });
+            }
+            return Unauthorized();
         }
 
-        // GET: api/Users
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserModel>>> GetUsers()
+        [HttpPost("register")]
+        public async Task<ActionResult<UserModel>> Register(UserModel user)
         {
-            return await _context.Users.ToListAsync();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            user.Password = _encrypter.EncryptData(user.Password);
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetUserModel", new { id = user.Id }, user);
         }
+
 
         // GET: api/Users/5
         [HttpGet("{id}")]
@@ -73,35 +110,6 @@ namespace BankApplication.Controllers
 
             return NoContent();
         }
-
-        // POST: api/Users
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<UserModel>> PostUserModel(UserModel userModel)
-        {
-            _context.Users.Add(userModel);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUserModel", new { id = userModel.Id }, userModel);
-        }
-
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<UserModel>> DeleteUserModel(int id)
-        {
-            var userModel = await _context.Users.FindAsync(id);
-            if (userModel == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(userModel);
-            await _context.SaveChangesAsync();
-
-            return userModel;
-        }
-
         private bool UserModelExists(int id)
         {
             return _context.Users.Any(e => e.Id == id);
