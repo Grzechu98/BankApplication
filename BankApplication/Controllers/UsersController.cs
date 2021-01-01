@@ -71,19 +71,13 @@ namespace BankApplication.Controllers
         [HttpGet]
         public async Task<ActionResult<UserModel>> GetUserModel()
         {
-            var userModel = await _context.Users.FindAsync(Int32.Parse(User.Claims.FirstOrDefault(c=>c.Type == ClaimTypes.NameIdentifier).Value));
+            var userModel = await _context.Users.Include(e => e.Address).FirstOrDefaultAsync(a => a.Id == Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value));
 
             if (userModel == null)
             {
                 return NotFound();
             }
-            var token = await _tokenService.GetToken(Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value));
-            return Ok(new
-            {
-                user = userModel,
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo
-            });
+            return Ok(userModel);
         }
 
         // PUT: api/Users/5
@@ -117,12 +111,7 @@ namespace BankApplication.Controllers
             }
 
             var token = await _tokenService.GetToken(Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value));
-            return Ok(new
-            {
-                user = userModel,
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo
-            });
+            return Ok(userModel);
         }
         private bool UserModelExists(int id)
         {

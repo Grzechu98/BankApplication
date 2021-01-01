@@ -32,8 +32,6 @@ namespace BankApplication.Models
         [Required]
         public DateTime IdentityDocumentExpirationDate { get; set; }
         [Required]
-        public int AddressId { get; set; }
-        [ForeignKey("AddressId")]
         public AddressModel Address { get; set; }
         [Required]
         public string Login { get; set; }
