@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BankApplication.Controllers
 {
@@ -65,11 +66,12 @@ namespace BankApplication.Controllers
         }
 
 
-        // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserModel>> GetUserModel(int id)
+        // GET: api/Users
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult<UserModel>> GetUserModel()
         {
-            var userModel = await _context.Users.FindAsync(id);
+            var userModel = await _context.Users.FindAsync(Int32.Parse(User.Claims.FirstOrDefault(c=>c.Type == ClaimTypes.NameIdentifier).Value));
 
             if (userModel == null)
             {
@@ -82,6 +84,7 @@ namespace BankApplication.Controllers
         // PUT: api/Users/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUserModel(int id, UserModel userModel)
         {
