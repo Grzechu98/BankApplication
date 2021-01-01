@@ -22,7 +22,7 @@ namespace BankApplication.Models
         [Required]
         public DateTime DateOfBirth { get; set; }
         [Required]
-        public string PESEL { get; set; }
+        public string PIN { get; set; }
         [Required]
         public string PhoneNumber { get; set; }
         [Required]
@@ -35,6 +35,7 @@ namespace BankApplication.Models
         public int AddressId { get; set; }
         [ForeignKey("AddressId")]
         public AddressModel Address { get; set; }
+        [Required]
         public string Login { get; set; }
         [JsonIgnore]
         public string Password { get; set; }

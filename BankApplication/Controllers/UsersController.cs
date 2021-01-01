@@ -77,8 +77,13 @@ namespace BankApplication.Controllers
             {
                 return NotFound();
             }
-
-            return userModel;
+            var token = await _tokenService.GetToken(Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value));
+            return Ok(new
+            {
+                user = userModel,
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                expiration = token.ValidTo
+            });
         }
 
         // PUT: api/Users/5
@@ -111,7 +116,13 @@ namespace BankApplication.Controllers
                 }
             }
 
-            return NoContent();
+            var token = await _tokenService.GetToken(Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value));
+            return Ok(new
+            {
+                user = userModel,
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                expiration = token.ValidTo
+            });
         }
         private bool UserModelExists(int id)
         {

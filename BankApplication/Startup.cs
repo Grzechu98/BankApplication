@@ -33,6 +33,7 @@ namespace BankApplication
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSwaggerGen();
             services.AddDbContext<MainContext>();
             services.AddControllers().AddNewtonsoftJson(options =>
             {
@@ -83,6 +84,12 @@ namespace BankApplication
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "BankAPI");
+            });
 
             app.UseCors("AllowAllHeaders");
             app.UseHttpsRedirection();

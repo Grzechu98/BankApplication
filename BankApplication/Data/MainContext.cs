@@ -35,7 +35,7 @@ namespace BankApplication.Data
             modelBuilder.Entity<OperationModel>().HasOne(om => om.Sender).WithMany(ba => ba.Outgoings).HasForeignKey(om => om.SenderId);
             modelBuilder.Entity<AddressModel>().HasMany(a => a.Residents).WithOne(um => um.Address);
 
-            modelBuilder.Entity<UserModel>().HasIndex(p => new { p.PESEL, p.IdentityDocumentNumber, p.Email, p.PhoneNumber, p.Login }).IsUnique();
+            modelBuilder.Entity<UserModel>().HasIndex(p => new { p.PIN, p.IdentityDocumentNumber, p.Email, p.PhoneNumber, p.Login }).IsUnique();
             modelBuilder.Entity<BankAccountModel>().HasIndex(p => p.AccountNumber).IsUnique();
         }
     }
