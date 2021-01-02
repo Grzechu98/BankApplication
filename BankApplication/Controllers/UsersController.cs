@@ -59,6 +59,12 @@ namespace BankApplication.Controllers
                 return BadRequest();
             }
             user.Password = _encrypter.EncryptData(user.Password);
+
+            var address = await _context.Addresses
+                .FirstOrDefaultAsync(e => e.City == user.Address.City && e.Country == user.Address.Country && e.Street == user.Address.Street && e.UnitNumber == user.Address.UnitNumber && e.PostCode == user.Address.PostCode);
+            if (address != null)
+                user.Address = address;
+
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
@@ -71,7 +77,8 @@ namespace BankApplication.Controllers
         [HttpGet]
         public async Task<ActionResult<UserModel>> GetUserModel()
         {
-            var userModel = await _context.Users.Include(e => e.Address).FirstOrDefaultAsync(a => a.Id == Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value));
+            var id = Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+           var userModel = await _context.Users.Include(e => e.Address).FirstOrDefaultAsync(a => a.Id == id);
 
             if (userModel == null)
             {
@@ -84,14 +91,14 @@ namespace BankApplication.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [Authorize]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUserModel(int id, UserModel userModel)
+        [HttpPut]
+        public async Task<IActionResult> PutUserModel(UserModel userModel)
         {
-            if (id != userModel.Id)
+            if (Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value) != userModel.Id)
             {
                 return BadRequest();
             }
-
+            userModel.Password = _encrypter.EncryptData(userModel.Password);
             _context.Entry(userModel).State = EntityState.Modified;
 
             try
@@ -100,7 +107,7 @@ namespace BankApplication.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserModelExists(id))
+                if (!UserModelExists(Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value)))
                 {
                     return NotFound();
                 }
@@ -109,10 +116,17 @@ namespace BankApplication.Controllers
                     throw;
                 }
             }
-
-            var token = await _tokenService.GetToken(Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value));
             return Ok(userModel);
         }
+
+        [Authorize]
+        [HttpGet("RenewToken")]
+        public async Task<ActionResult<UserModel>> RenewToken()
+        {
+            var id = Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(await _tokenService.GetToken(Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value))) });   
+        }
+
         private bool UserModelExists(int id)
         {
             return _context.Users.Any(e => e.Id == id);

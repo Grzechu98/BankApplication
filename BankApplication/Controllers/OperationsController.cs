@@ -9,9 +9,11 @@ using BankApplication.Data;
 using BankApplication.Models;
 using System.Security.Claims;
 using BankApplication.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BankApplication.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OperationsController : ControllerBase
@@ -24,6 +26,16 @@ namespace BankApplication.Controllers
             _context = context;
             _validator = validator;
         }
+
+        [HttpGet]
+        public async Task<ActionResult<ICollection<OperationModel>>> GetOperations(int id)
+        {
+            var sid = Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            var operationModel = await _context.Operations.Where(s => s.SenderId == sid).ToListAsync();
+
+            return operationModel;
+        }
+
         // GET: api/Operations/5
         [HttpGet("{id}")]
         public async Task<ActionResult<OperationModel>> GetOperationModel(int id)
@@ -38,20 +50,47 @@ namespace BankApplication.Controllers
             return operationModel;
         }
 
-        // POST: api/Operations
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<OperationModel>> PostOperationModel(OperationModel operationModel)
+        [HttpPost("InternalTransfer")]
+        public async Task<ActionResult<OperationModel>> MakeInternalTransfer(OperationModel operationModel)
         {
-            _context.Operations.Add(operationModel);
-            await _context.SaveChangesAsync();
+            if (operationModel.RecipientId == null)
+                return BadRequest();
+            operationModel.OperationDate = DateTime.Now;
+            var recipient = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.RecipientId);
+            var sender = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.SenderId);
+            if (await _validator.HasUnusedLimit(operationModel) && await _validator.IsTransferAmountCorrect(operationModel) && await _validator.HasDailyAmountUnusedLimit(operationModel))
+            {
+                if (sender.Balance < operationModel.Value)
+                {
+                    return BadRequest("lack of account funds");
+                }
+                else
+                {
+                    operationModel.Status = "Pending";
+                    recipient.Balance += operationModel.Value;
+                    sender.Balance -= operationModel.Value;
+                }
+            }
+            else
+            {
+                return BadRequest("limits exceeded");
+            }
+            try
+            {
+                _context.Operations.Add(operationModel);
+                await _context.SaveChangesAsync();
+                operationModel.Status = "Success";
+            }
+            catch(Exception e)
+            {
+                return BadRequest("error");
+            }
+            
 
             return CreatedAtAction("GetOperationModel", new { id = operationModel.Id }, operationModel);
         }
-
-        [HttpPost("InternalTransfer")]
-        public async Task<ActionResult<OperationModel>> MakeInternalTransfer(OperationModel operationModel)
+        [HttpPost("ExternalTransfer")]
+        public async Task<ActionResult<OperationModel>> MakeExternalTransfer(OperationModel operationModel)
         {
             if (operationModel.RecipientId == null)
                 return BadRequest();
@@ -65,8 +104,7 @@ namespace BankApplication.Controllers
                 }
                 else
                 {
-                    recipient.Balance += operationModel.Value;
-                    sender.Balance -= operationModel.Value;
+                    //TODO
                 }
             }
             else
@@ -78,6 +116,6 @@ namespace BankApplication.Controllers
 
             return CreatedAtAction("GetOperationModel", new { id = operationModel.Id }, operationModel);
         }
-  
+
     }
 }

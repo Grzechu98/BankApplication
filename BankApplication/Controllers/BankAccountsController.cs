@@ -29,14 +29,16 @@ namespace BankApplication.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BankAccountModel>>> GetBankAccounts()
         {
-            return await _context.BankAccounts.Where(e => e.UserId == Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value)).ToListAsync();
+            var id = Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            return await _context.BankAccounts.Where(e => e.UserId == id).ToListAsync();
         }
 
         // GET: api/BankAccounts/5
         [HttpGet("{id}")]
         public async Task<ActionResult<BankAccountModel>> GetBankAccountModel(int id)
         {
-            var bankAccountModel = await _context.BankAccounts.FirstOrDefaultAsync(e => e.UserId == Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value) && e.Id == id);
+            var uid = Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            var bankAccountModel = await _context.BankAccounts.FirstOrDefaultAsync(e => e.UserId == uid && e.Id == id);
 
             if (bankAccountModel == null)
             {
@@ -92,9 +94,6 @@ namespace BankApplication.Controllers
 
             return CreatedAtAction("GetBankAccountModel", new { id = BankAccount.Id }, BankAccount);
         }
-
-       
-
         private bool BankAccountModelExists(int id)
         {
             return _context.BankAccounts.Any(e => e.Id == id);

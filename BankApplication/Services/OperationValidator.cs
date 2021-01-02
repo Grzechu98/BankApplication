@@ -25,7 +25,7 @@ namespace BankApplication.Services
 
         public async Task<bool> HasDailyAmountUnusedLimit(OperationModel operation)
         {
-            var operations = await _context.Operations.Where(e => e.SenderId == operation.SenderId && IsDateBetween(e.OperationDate)).ToListAsync();
+            var operations = await _context.Operations.Where(e => e.SenderId == operation.SenderId && e.OperationDate >= DateTime.Now.AddDays(-1)).ToListAsync();
             var settings = await _context.AccountSettings.FirstOrDefaultAsync(e => e.BankAccountId == operation.SenderId);
             decimal total = 0;
             
@@ -44,7 +44,7 @@ namespace BankApplication.Services
 
         public async Task<bool> HasUnusedLimit(OperationModel operation)
         {
-            var operations = await _context.Operations.Where(e => e.SenderId == operation.SenderId && IsDateBetween(e.OperationDate)).ToListAsync();
+            var operations = await _context.Operations.Where(e => e.SenderId == operation.SenderId && e.OperationDate >= DateTime.Now.AddDays(-1)).ToListAsync();
             var settings = await _context.AccountSettings.FirstOrDefaultAsync(e => e.BankAccountId == operation.SenderId);
             
             if (operations.Count < settings.MaxDailyOperationsNumber)
@@ -65,7 +65,8 @@ namespace BankApplication.Services
 
         private bool IsDateBetween(DateTime date)
         {
-            return date >= DateTime.Now.AddDays(-1) && date <= DateTime.Now;
+            bool a = date >= DateTime.Now.AddDays(-1) && date <= DateTime.Now;
+            return a;
         }
     }
 }
