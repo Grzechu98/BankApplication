@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankApplication", "BankAppl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankApplication.Tests", "..\BankApplication.Tests\BankApplication.Tests.csproj", "{FC0B7ECE-DA02-4878-B19E-AC71D4F9C352}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankApplication.BlazorFrontend", "..\BankApplication.BlazorFrontend\BankApplication.BlazorFrontend.csproj", "{21C68B09-100C-42C4-AE36-929E8AF5B3A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankApplication.BlazorFrontend", "..\BankApplication.BlazorFrontend\BankApplication.BlazorFrontend.csproj", "{21C68B09-100C-42C4-AE36-929E8AF5B3A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
