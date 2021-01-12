@@ -20,7 +20,7 @@ namespace BankApplication.Tests
             {
                 Method = HttpMethod.Get,
                 Content = new StringContent("", Encoding.UTF8, "application/json"),
-                RequestUri = new Uri("http://localhost:61004/api/AccountSettings/2")
+                RequestUri = new Uri("http://localhost:61005/api/AccountSettings/2")
             };
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", config["JWTToken"]);
 
@@ -46,7 +46,7 @@ namespace BankApplication.Tests
             {
                 Method = HttpMethod.Put,
                 Content = JsonHelper.TransformToJson(ToPut),
-                RequestUri = new Uri("http://localhost:61004/api/AccountSettings/2")
+                RequestUri = new Uri("http://localhost:61005/api/AccountSettings/2")
             };
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", config["JWTToken"]);
 

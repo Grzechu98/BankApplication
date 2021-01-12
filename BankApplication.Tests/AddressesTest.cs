@@ -30,7 +30,7 @@ namespace BankApplication.Tests
             {
                 Method = HttpMethod.Put,
                 Content = JsonHelper.TransformToJson(ToPost),
-                RequestUri = new Uri("http://localhost:61004/api/Addresses/2")
+                RequestUri = new Uri("http://localhost:61005/api/Addresses/2")
             };
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", config["JWTToken"]);
 
