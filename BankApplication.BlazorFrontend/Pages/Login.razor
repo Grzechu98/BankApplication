@@ -54,9 +54,11 @@
             {
                 NavigationManager.NavigateTo("dashboard");
             }
-            AlertService.Error("Sprawdź wprowadzone dane!");
+            else
+            {
+                AlertService.Error("Sprawdź wprowadzone dane!");
+            }
             loading = false;
-
         }
         catch (Exception ex)
         {
