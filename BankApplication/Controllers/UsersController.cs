@@ -43,7 +43,8 @@ namespace BankApplication.Controllers
 
                 return Ok(new
                 {
-                    user = user,
+                    name = user.Name,
+                    secondname = user.Secondname,
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     expiration = token.ValidTo
                 });

@@ -53,11 +53,6 @@ namespace BankApplication.BlazorFrontend.Services
             var request = createRequest(HttpMethod.Post, uri, value);
             return await sendRequest<T>(request);
         }
-        public async Task<T> Login<T>(string uri, object value)
-        {
-            var request = createRequest(HttpMethod.Post, uri, value);
-            return await sendLoginRequest<T>(request);
-        }
 
         public async Task Put(string uri, object value)
         {
@@ -111,27 +106,6 @@ namespace BankApplication.BlazorFrontend.Services
         }
 
         private async Task<T> sendRequest<T>(HttpRequestMessage request)
-        {
-            await addJwtHeader(request);
-
-            // send request
-            using var response = await _httpClient.SendAsync(request);
-
-            // auto logout on 401 response
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                _navigationManager.NavigateTo("login");
-                return default;
-            }
-
-            await handleErrors(response);
-
-            var options = new JsonSerializerOptions();
-            options.PropertyNameCaseInsensitive = true;
-            return await response.Content.ReadFromJsonAsync<T>(options);
-        }
-
-        private async Task<T> sendLoginRequest<T>(HttpRequestMessage request)
         {
             await addJwtHeader(request);
 
