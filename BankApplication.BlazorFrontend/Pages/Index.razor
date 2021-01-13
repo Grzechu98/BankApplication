@@ -1,6 +1,17 @@
 ﻿@page "/"
+@inject ILocalStorageService LocalStorageService
+@inject IUserManagmentService UserManagmentService
 <UnloggedNav></UnloggedNav>
-    <h1>Hello, world!</h1>
+<h1>Hello, world!</h1>
 
     Welcome to your new app.
 
+@code{
+    protected override async void OnInitialized()
+    {
+        if (await LocalStorageService.GetItem<Models.UserModel>("user") != null)
+        {
+            await UserManagmentService.Logout();
+        }
+    }
+}

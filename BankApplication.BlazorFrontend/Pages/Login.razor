@@ -41,6 +41,14 @@
     private Models.LoginModel model = new Models.LoginModel();
     private bool loading;
 
+    protected override async void OnInitialized()
+    {
+        if (await LocalStorageService.GetItem<Models.UserModel>("user") != null)
+        {
+            await UserManagmentService.Logout();
+        }
+    }
+
     private async Task OnValidSubmit()
     {
         AlertService.Clear();

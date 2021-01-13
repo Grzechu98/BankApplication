@@ -2,9 +2,26 @@
 @inject IUserManagmentService UserManagmentService
 @inject NavigationManager NavigationManager
 @inject IAlertService AlertService
- <LoggedNav></LoggedNav>
-<h3>Dashboard</h3>
+@inject ILocalStorageService LocalStorageService
+<LoggedNav></LoggedNav>
+<div class="container-fluid p-5">
+    <h1>Witaj, @User.Name</h1>
+    <br />
+    <h3>Twoje rachunki bankowe:</h3>
+    <div class="d-flex justify-content-center row">
+        <div class="col-xl-6">
+
+        </div>
+    </div>
+</div>
 
 @code {
+    private Models.UserModel User { get; set; } = new Models.UserModel();
 
+
+    protected override async void OnInitialized()
+    {
+        User = await LocalStorageService.GetItem<Models.UserModel>("user");
+        StateHasChanged();
+    }
 }

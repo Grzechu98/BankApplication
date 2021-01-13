@@ -2,6 +2,7 @@
 @inject IUserManagmentService UserManagmentService
 @inject NavigationManager NavigationManager
 @inject IAlertService AlertService
+@inject ILocalStorageService LocalStorageService
 <UnloggedNav></UnloggedNav>
 <div class="container-fluid p-5">
     <div class="d-flex justify-content-center row">
@@ -122,6 +123,14 @@
     private Models.RegisterModel model = new Models.RegisterModel();
     private Models.AddressModel address = new Models.AddressModel();
     private bool loading;
+
+    protected override async void OnInitialized()
+    {
+        if (await LocalStorageService.GetItem<Models.UserModel>("user") != null)
+        {
+            await UserManagmentService.Logout();
+        }
+    }
 
     private async void OnValidSubmit()
     {
