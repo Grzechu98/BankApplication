@@ -9,7 +9,7 @@
 @code{
     protected override async void OnInitialized()
     {
-        if (await LocalStorageService.GetItem<Models.UserModel>("user") != null)
+        if (await LocalStorageService.GetItem<Models.StorageUserModel>("user") != null)
         {
             await UserManagmentService.Logout();
         }

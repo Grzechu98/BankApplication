@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BankApplication.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -18,6 +17,9 @@ using Newtonsoft.Json;
 using System.Buffers;
 using Newtonsoft.Json.Serialization;
 using BankApplication.Services;
+using BankApplication.SharedLibrary.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer;
 
 namespace BankApplication
 {
@@ -34,7 +36,16 @@ namespace BankApplication
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSwaggerGen();
-            services.AddDbContext<MainContext>();
+            //_config.GetConnectionString("Db")
+            string dbConnectionString = Configuration.GetConnectionString("Db");
+            string assemblyName = typeof(MainContext).Namespace;
+            services.AddDbContext<MainContext>(options =>
+             options.UseSqlServer(Configuration.GetConnectionString("Db"),
+                 optionsBuilder =>
+                    optionsBuilder.MigrationsAssembly(assemblyName)
+                 )
+              );
+
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();

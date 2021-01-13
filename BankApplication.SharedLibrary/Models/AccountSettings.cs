@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BankApplication.Models
+namespace BankApplication.SharedLibrary.Models
 {
     public class AccountSettings
     {

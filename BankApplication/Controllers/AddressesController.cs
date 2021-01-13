@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BankApplication.Data;
-using BankApplication.Models;
+using BankApplication.SharedLibrary.Models;
+using BankApplication.SharedLibrary.Data;
 using Microsoft.AspNetCore.Authorization;
 
 namespace BankApplication.Controllers

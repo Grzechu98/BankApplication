@@ -16,12 +16,12 @@
 </div>
 
 @code {
-    private Models.UserModel User { get; set; } = new Models.UserModel();
+    private Models.StorageUserModel User { get; set; } = new Models.StorageUserModel();
 
 
     protected override async void OnInitialized()
     {
-        User = await LocalStorageService.GetItem<Models.UserModel>("user");
+        User = await LocalStorageService.GetItem<Models.StorageUserModel>("user");
         StateHasChanged();
     }
 }

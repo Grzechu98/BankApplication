@@ -3,10 +3,27 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BankApplication.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class SLinit : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Addresses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Country = table.Column<string>(nullable: false),
+                    City = table.Column<string>(nullable: false),
+                    Street = table.Column<string>(nullable: false),
+                    UnitNumber = table.Column<string>(nullable: false),
+                    PostCode = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Addresses", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -18,17 +35,24 @@ namespace BankApplication.Migrations
                     Nationality = table.Column<string>(nullable: true),
                     PlaceOfBirth = table.Column<string>(nullable: true),
                     DateOfBirth = table.Column<DateTime>(nullable: false),
-                    PESEL = table.Column<string>(nullable: true),
+                    PIN = table.Column<string>(nullable: true),
                     PhoneNumber = table.Column<string>(nullable: true),
                     Email = table.Column<string>(nullable: true),
                     IdentityDocumentNumber = table.Column<string>(nullable: true),
                     IdentityDocumentExpirationDate = table.Column<DateTime>(nullable: false),
+                    AddressId = table.Column<int>(nullable: true),
                     Login = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Addresses_AddressId",
+                        column: x => x.AddressId,
+                        principalTable: "Addresses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -37,11 +61,10 @@ namespace BankApplication.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AccountNumber = table.Column<string>(nullable: false),
+                    AccountNumber = table.Column<string>(nullable: true),
                     Balance = table.Column<decimal>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false),
-                    UserId = table.Column<int>(nullable: false),
-                    SettingsId = table.Column<int>(nullable: false)
+                    UserId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -114,6 +137,13 @@ namespace BankApplication.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_BankAccounts_AccountNumber",
+                table: "BankAccounts",
+                column: "AccountNumber",
+                unique: true,
+                filter: "[AccountNumber] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BankAccounts_UserId",
                 table: "BankAccounts",
                 column: "UserId");
@@ -127,6 +157,18 @@ namespace BankApplication.Migrations
                 name: "IX_Operations_SenderId",
                 table: "Operations",
                 column: "SenderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_AddressId",
+                table: "Users",
+                column: "AddressId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_PIN_IdentityDocumentNumber_Email_PhoneNumber_Login",
+                table: "Users",
+                columns: new[] { "PIN", "IdentityDocumentNumber", "Email", "PhoneNumber", "Login" },
+                unique: true,
+                filter: "[PIN] IS NOT NULL AND [IdentityDocumentNumber] IS NOT NULL AND [Email] IS NOT NULL AND [PhoneNumber] IS NOT NULL AND [Login] IS NOT NULL");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -142,6 +184,9 @@ namespace BankApplication.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Addresses");
         }
     }
 }

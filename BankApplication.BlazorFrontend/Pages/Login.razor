@@ -43,7 +43,7 @@
 
     protected override async void OnInitialized()
     {
-        if (await LocalStorageService.GetItem<Models.UserModel>("user") != null)
+        if (await LocalStorageService.GetItem<Models.StorageUserModel>("user") != null)
         {
             await UserManagmentService.Logout();
         }
@@ -57,8 +57,7 @@
         {
             await UserManagmentService.Login(model);
             // await Task.Delay(40000);
-            Console.WriteLine(await LocalStorageService.GetItem<Models.UserModel>("user"));
-            if (await LocalStorageService.GetItem<Models.UserModel>("user") != null)
+            if (await LocalStorageService.GetItem<Models.StorageUserModel>("user") != null)
             {
                 NavigationManager.NavigateTo("dashboard");
             }

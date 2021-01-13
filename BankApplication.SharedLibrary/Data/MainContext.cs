@@ -1,4 +1,4 @@
-﻿using BankApplication.Models;
+﻿using BankApplication.SharedLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BankApplication.Data
+namespace BankApplication.SharedLibrary.Data
 {
     public class MainContext : DbContext
     {
@@ -25,7 +25,7 @@ namespace BankApplication.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(_config.GetConnectionString("Db"));
+            optionsBuilder.UseSqlServer(_config.GetConnectionString("Db"), b => b.MigrationsAssembly("BankApplication"));
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

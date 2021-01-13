@@ -19,5 +19,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BankApplication.SharedLibrary\BankApplication.SharedLibrary.csproj" />
+  </ItemGroup>
+
 
 </Project>

@@ -1,5 +1,5 @@
 ﻿using BankApplication.Controllers;
-using BankApplication.Models;
+using BankApplication.SharedLibrary.Models;
 using BankApplication.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;

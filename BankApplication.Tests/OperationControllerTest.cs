@@ -15,7 +15,7 @@ namespace BankApplication.Tests
         public async Task GetOperations_IntegrationTest()
         {
             var config = new ConfigurationBuilder()
-            .AddJsonFile("jwtconfigtests.json").Build();
+            .AddJsonFile("jwtconfigtests.json").Build(); 
             var requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,

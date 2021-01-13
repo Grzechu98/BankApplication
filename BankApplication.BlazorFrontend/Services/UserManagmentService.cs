@@ -1,4 +1,5 @@
 ﻿using BankApplication.BlazorFrontend.Models;
+using BankApplication.SharedLibrary.Models;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -9,17 +10,17 @@ namespace BankApplication.BlazorFrontend.Services
 {
     public interface IUserManagmentService
     {
-        UserModel User { get; }
+        StorageUserModel User { get; }
         Task Initialize();
         Task Login(LoginModel model);
         Task Logout();
-        Task Register(RegisterModel model);
-        Task Update(RegisterModel model);
+        Task Register(UserModel model);
+        Task Update(UserModel model);
 
     }
     public class UserManagmentService : IUserManagmentService
     {
-        public UserModel User { get; private set; }
+        public StorageUserModel User { get; private set; }
         private readonly ILocalStorageService _localStorageService;
         private readonly IApiComunicationService _apiComunicationService;
         private readonly string _baseAdress = "http://localhost:61005/api/Users";
@@ -32,12 +33,12 @@ namespace BankApplication.BlazorFrontend.Services
 
         public async Task Initialize()
         {
-            User = await _localStorageService.GetItem<UserModel>("user");
+            User = await _localStorageService.GetItem<StorageUserModel>("user");
         }
 
         public async Task Login(LoginModel model)
         {
-            User = await _apiComunicationService.Post<UserModel>(_baseAdress+"/login", model);
+            User = await _apiComunicationService.Post<StorageUserModel>(_baseAdress+"/login", model);
             await _localStorageService.SetItem("user", User);
         }
 
@@ -46,12 +47,12 @@ namespace BankApplication.BlazorFrontend.Services
             await _localStorageService.RemoveItem("user");
         }
 
-        public async Task Register(RegisterModel model)
+        public async Task Register(UserModel model)
         {
-            User = await _apiComunicationService.Post<UserModel>(_baseAdress + "/register", model);
+           await _apiComunicationService.Post<UserModel>(_baseAdress + "/register", model);
         }
 
-        public Task Update(RegisterModel model)
+        public Task Update(UserModel model)
         {
             throw new NotImplementedException();
         }

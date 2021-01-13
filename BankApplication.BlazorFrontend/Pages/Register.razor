@@ -120,13 +120,14 @@
     </div>
 </div>
 @code {
-    private Models.RegisterModel model = new Models.RegisterModel();
-    private Models.AddressModel address = new Models.AddressModel();
+    // private Models.RegisterModel model = new Models.RegisterModel();
+    private UserModel model = new UserModel();
+    private AddressModel address = new AddressModel();
     private bool loading;
 
     protected override async void OnInitialized()
     {
-        if (await LocalStorageService.GetItem<Models.UserModel>("user") != null)
+        if (await LocalStorageService.GetItem<Models.StorageUserModel>("user") != null)
         {
             await UserManagmentService.Logout();
         }
