@@ -56,23 +56,23 @@
         try
         {
             await UserManagmentService.Login(model);
-            // await Task.Delay(40000);
             if (await LocalStorageService.GetItem<Models.StorageUserModel>("user") != null)
-            {
-                NavigationManager.NavigateTo("dashboard");
-            }
-            else
-            {
-                AlertService.Error("Sprawdź wprowadzone dane!");
-            }
-            loading = false;
+            { 
+            await Task.Delay(50);
+            NavigationManager.NavigateTo("dashboard");
         }
+            else
+        {
+            AlertService.Error("Sprawdź wprowadzone dane!");
+        }
+        loading = false;
+    }
         catch (Exception ex)
         {
             AlertService.Error("Nie udało się zalogować!");
             loading = false;
             StateHasChanged();
-        }
+}
 
     }
 }

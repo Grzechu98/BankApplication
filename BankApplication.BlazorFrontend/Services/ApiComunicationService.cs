@@ -129,8 +129,8 @@ namespace BankApplication.BlazorFrontend.Services
         private async Task addJwtHeader(HttpRequestMessage request)
         {
             var user = await _localStorageService.GetItem<StorageUserModel>("user");
-            var isApiUrl = !request.RequestUri.IsAbsoluteUri;
-            if (user != null && isApiUrl)
+           var isApiUrl = request.RequestUri.IsAbsoluteUri;
+           if (user != null && isApiUrl)
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", user.Token);
         }
 

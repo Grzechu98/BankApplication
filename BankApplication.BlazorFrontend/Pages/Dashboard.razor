@@ -1,27 +1,78 @@
 ﻿@page "/dashboard"
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 @inject IUserManagmentService UserManagmentService
 @inject NavigationManager NavigationManager
 @inject IAlertService AlertService
 @inject ILocalStorageService LocalStorageService
+@inject IApiComunicationService ApiComunicationService
+
 <LoggedNav></LoggedNav>
 <div class="container-fluid p-5">
     <h1>Witaj, @User.Name</h1>
     <br />
     <h3>Twoje rachunki bankowe:</h3>
-    <div class="d-flex justify-content-center row">
+    <div class="d-flex justify-content-center row p-3">
         <div class="col-xl-6">
-
+            <div class="card" style="width: 50rem;">
+                <div class="card-header">
+                    <button @onclick="() => CreateAccount()" class="btn btn-link">Otwórz rachunek</button>
+                </div>
+            </div>
+            <br />
+            @if (BankAccounts.Any())
+            {
+                foreach (var item in BankAccounts)
+                {
+                    <div class="card" style="width: 50rem;">
+                        <div class="card-header">
+                            <h4>Numer rachunku: @item.AccountNumber</h4>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            @if (item.IsActive)
+                            {
+                                <li class="list-group-item"><h5>Saldo: @item.Balance</h5></li>
+                                <li class="list-group-item"><a href="operations/newtransfer/@item.Id" class="btn btn-link">Nowy przelew</a><a href="operations/@item.Id" class="btn btn-link">Historia operacji</a><button  @onclick="() => CloseAccount(item.Id)" class="btn btn-link">Zamknij rachunek</button></li>
+                            }
+                            else
+                            {
+                                <li class="list-group-item"><h5>Konto zamknięte</h5><p>Aby odebrać zdeponowane pieniądze należy zgłosic się do placówki banku</p></li>
+                                <li class="list-group-item"><h6>Saldo: @item.Balance </h6></li>
+                                <li class="list-group-item"><a href="operations/@item.Id" class="btn btn-link">Historia operacji</a></li>
+                            }
+                        </ul>
+                    </div>
+                    <br />
+                }
+            }
         </div>
     </div>
 </div>
 
 @code {
     private Models.StorageUserModel User { get; set; } = new Models.StorageUserModel();
-
+    private IEnumerable<BankAccountModel> BankAccounts { get; set; } = new List<BankAccountModel>();
 
     protected override async void OnInitialized()
     {
         User = await LocalStorageService.GetItem<Models.StorageUserModel>("user");
+        BankAccounts = await ApiComunicationService.Get<IEnumerable<BankAccountModel>>(Configuration["BaseUrl"] + "BankAccounts");
         StateHasChanged();
+    }
+
+    public async void CreateAccount()
+    {
+        await ApiComunicationService.Post<BankAccountModel>(Configuration["BaseUrl"] + "BankAccounts", null);
+        BankAccounts = await ApiComunicationService.Get<IEnumerable<BankAccountModel>>(Configuration["BaseUrl"] + "BankAccounts");
+        StateHasChanged();
+        AlertService.Success("Pomyślnie utworzono nowy rachunek");
+    }
+   
+    public async void CloseAccount(int Id)
+    {
+        await ApiComunicationService.Put(Configuration["BaseUrl"] + "BankAccounts/CloseAccount/"+Id, null);
+        BankAccounts = await ApiComunicationService.Get<IEnumerable<BankAccountModel>>(Configuration["BaseUrl"] + "BankAccounts");
+        StateHasChanged();
+        AlertService.Success("Zamknięto rachunek");
     }
 }

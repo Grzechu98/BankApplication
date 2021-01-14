@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankApplication.Tests", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankApplication.BlazorFrontend", "..\BankApplication.BlazorFrontend\BankApplication.BlazorFrontend.csproj", "{21C68B09-100C-42C4-AE36-929E8AF5B3A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankApplication.SharedLibrary", "..\BankApplication.SharedLibrary\BankApplication.SharedLibrary.csproj", "{06ED991D-6EBB-40AC-827E-0119F20FCCE6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankApplication.SharedLibrary", "..\BankApplication.SharedLibrary\BankApplication.SharedLibrary.csproj", "{06ED991D-6EBB-40AC-827E-0119F20FCCE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

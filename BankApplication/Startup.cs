@@ -36,7 +36,6 @@ namespace BankApplication
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSwaggerGen();
-            //_config.GetConnectionString("Db")
             string dbConnectionString = Configuration.GetConnectionString("Db");
             string assemblyName = typeof(MainContext).Namespace;
             services.AddDbContext<MainContext>(options =>
