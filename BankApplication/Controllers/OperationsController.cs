@@ -31,7 +31,18 @@ namespace BankApplication.Controllers
         public async Task<ActionResult<ICollection<OperationModel>>> GetOperations(int id)
         {
             var sid = Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
-            var operationModel = await _context.Operations.Where(s => s.SenderId == sid).ToListAsync();
+            var operationModel = await _context.Operations.Where(s => s.SenderId == sid || s.RecipientId == sid).ToListAsync();
+            foreach (var item in operationModel)
+            {
+                if (item.SenderId == sid)
+                {
+                    item.Incoming = false;
+                }
+                else
+                {
+                    item.Incoming = true;
+                }
+            }
 
             return operationModel;
         }
@@ -66,7 +77,6 @@ namespace BankApplication.Controllers
                 }
                 else
                 {
-                    operationModel.Status = "Pending";
                     recipient.Balance += operationModel.Value;
                     sender.Balance -= operationModel.Value;
                 }
@@ -79,7 +89,6 @@ namespace BankApplication.Controllers
             {
                 _context.Operations.Add(operationModel);
                 await _context.SaveChangesAsync();
-                operationModel.Status = "Success";
             }
             catch(Exception e)
             {

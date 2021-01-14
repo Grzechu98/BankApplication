@@ -1,4 +1,5 @@
 ﻿@page "/operations"
+@page "/operations/{id:int}"
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @inject IUserManagmentService UserManagmentService
@@ -6,7 +7,57 @@
 @inject IAlertService AlertService
 @inject ILocalStorageService LocalStorageService
 @inject IApiComunicationService ApiComunicationService
+<LoggedNav></LoggedNav>
+<div class="container-fluid p-5">
+    <div class="d-flex justify-content-center row p-3">
+        <div class="col-xl-6">
+            @if (AccountOperations.Any())
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Typ przelewu</th>
+                            <th scope="col">Tytuł przelewu</th>
+                            <th scope="col">Data operacj</th>
+                            <th scope="col">Kwota</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in AccountOperations)
+                        {
+                        <tr>
+                            <td>@item.Type</td>
+                            <td>@item.Title</td>
+                            <td>@item.OperationDate</td>
+                            @if (item.Incoming)
+                            {
+                                <td style="color:green;">+@item.Value</td>
+                            }
+                            else
+                            {
+                                <td style="color:red;">-@item.Value</td>
+                            }
+                            <td><button class="btn btn-link">Szczegóły</button></td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
 
 @code {
 
+    [Parameter]
+    public int Id { get; set; }
+
+    private IEnumerable<OperationModel> AccountOperations { get; set; } = new List<OperationModel>();
+
+    protected override async void OnInitialized()
+    {
+        AccountOperations = await ApiComunicationService.Get<IEnumerable<OperationModel>>(Configuration["BaseUrl"] + "Operations");
+        StateHasChanged();
+    }
 }
