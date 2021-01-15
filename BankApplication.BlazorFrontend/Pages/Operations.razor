@@ -8,6 +8,7 @@
 @inject ILocalStorageService LocalStorageService
 @inject IApiComunicationService ApiComunicationService
 <LoggedNav></LoggedNav>
+<OperationDetailsModal @ref="Modal"></OperationDetailsModal>
 <div class="container-fluid p-5">
     <div class="d-flex justify-content-center row p-3">
         <div class="col-xl-6">
@@ -26,7 +27,7 @@
                     <tbody>
                         @foreach (var item in AccountOperations)
                         {
-                        <tr>
+                         <tr>
                             <td>@item.Type</td>
                             <td>@item.Title</td>
                             <td>@item.OperationDate</td>
@@ -38,8 +39,8 @@
                             {
                                 <td style="color:red;">-@item.Value</td>
                             }
-                            <td><button class="btn btn-link">Szczegóły</button></td>
-                        </tr>
+                            <td><button @onclick="() => Modal.Open(item.Id)" class="btn btn-link">Szczegóły</button></td>
+                         </tr>
                         }
                     </tbody>
                 </table>
@@ -52,6 +53,8 @@
 
     [Parameter]
     public int Id { get; set; }
+
+    private OperationDetailsModal Modal { get; set; }
 
     private IEnumerable<OperationModel> AccountOperations { get; set; } = new List<OperationModel>();
 

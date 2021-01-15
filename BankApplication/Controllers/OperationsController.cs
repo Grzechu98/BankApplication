@@ -51,7 +51,7 @@ namespace BankApplication.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<OperationModel>> GetOperationModel(int id)
         {
-            var operationModel = await _context.Operations.FindAsync(id);
+            var operationModel = await _context.Operations.Include(o => o.Recipient).ThenInclude(r => r.User).Include(o => o.Sender).ThenInclude(r => r.User).FirstOrDefaultAsync(o => o.Id == id);
 
             if (operationModel == null)
             {

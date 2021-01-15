@@ -1,0 +1,68 @@
+﻿@inject IApiComunicationService ApiComunicationService
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            </div>
+            <div class="modal-body">
+                <h5>Tytuł: @Operation.Title</h5>
+                <br />
+                <h5>Data: @Operation.OperationDate</h5>
+                <br />
+                <h5>Kwota: @Operation.Value</h5>
+                <br />
+                <h6>Nadawca: @SenderName</h6>
+                <br />
+                <h6>Odbiorca: @RecipientName</h6>
+                <br />
+                <h6>Typ: @Operation.Type</h6>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Zamknij</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    public Guid Guid = Guid.NewGuid();
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+
+    private OperationModel Operation { get; set; } = new OperationModel();
+    private string SenderName { get; set; }
+    private string RecipientName { get; set; }
+
+    public async void Open(int id)
+    {
+        await GetOperation(id);
+        SenderName = Operation.Sender.User.Name + " " + Operation.Sender.User.Secondname;
+        RecipientName = Operation.Recipient.User.Name + " " + Operation.Recipient.User.Secondname;
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        StateHasChanged();
+    }
+
+    public void Close()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        StateHasChanged();
+    }
+
+    public async Task GetOperation(int id)
+    {
+        Operation = await ApiComunicationService.Get<OperationModel>(Configuration["BaseUrl"] + "Operations/"+id);
+    }
+}
