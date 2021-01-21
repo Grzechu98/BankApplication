@@ -14,6 +14,7 @@ namespace BankApplication.SharedLibrary.Data
 
         public DbSet<UserModel> Users { get; set; }
         public DbSet<OperationModel> Operations { get; set; }
+        public DbSet<ExternalOperationModel> ExternalOperations { get; set; }
         public DbSet<BankAccountModel> BankAccounts { get; set; }
         public DbSet<AccountSettings> AccountSettings { get; set; }
         public DbSet<AddressModel> Addresses { get; set; }
@@ -31,6 +32,7 @@ namespace BankApplication.SharedLibrary.Data
         {
             modelBuilder.Entity<UserModel>().HasMany(um => um.Accounts).WithOne(ba=>ba.User).HasForeignKey(ba=>ba.UserId);
             modelBuilder.Entity<AccountSettings>().HasOne(a => a.BankAccount).WithOne(ba => ba.Settings).HasForeignKey<AccountSettings>(a => a.BankAccountId);
+            modelBuilder.Entity<ExternalOperationModel>().HasOne(e => e.TargetInternalAccount).WithMany(ba => ba.ExternalOperations).HasForeignKey(a => a.TargetInternalAccountId);
             modelBuilder.Entity<OperationModel>().HasOne(om => om.Recipient).WithMany(ba => ba.Incomings).HasForeignKey(om => om.RecipientId);
             modelBuilder.Entity<OperationModel>().HasOne(om => om.Sender).WithMany(ba => ba.Outgoings).HasForeignKey(om => om.SenderId);
             modelBuilder.Entity<AddressModel>().HasMany(a => a.Residents).WithOne(um => um.Address);

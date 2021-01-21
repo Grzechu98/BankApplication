@@ -18,6 +18,7 @@ namespace BankApplication.SharedLibrary.Models
         public virtual UserModel User { get; set; }
         public virtual ICollection<OperationModel> Incomings { get; set; }
         public virtual ICollection<OperationModel> Outgoings { get; set; }
+        public virtual ICollection<ExternalOperationModel> ExternalOperations { get; set; }
         public virtual AccountSettings Settings { get; set; }
 
     }
