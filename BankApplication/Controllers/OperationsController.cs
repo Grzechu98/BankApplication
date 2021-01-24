@@ -28,10 +28,12 @@ namespace BankApplication.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ICollection<OperationModel>>> GetOperations(int id)
+        public async Task<ActionResult<ICollection<IOperation>>> GetOperations()
         {
             var sid = Int32.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
             var operationModel = await _context.Operations.Where(s => s.SenderId == sid || s.RecipientId == sid).ToListAsync();
+            var eoperationModel = await _context.ExternalOperations.Where(e => e.TargetInternalAccountId == sid).ToListAsync();
+           
             foreach (var item in operationModel)
             {
                 if (item.SenderId == sid)
@@ -43,15 +45,31 @@ namespace BankApplication.Controllers
                     item.Incoming = true;
                 }
             }
-
-            return operationModel;
+            var list = new List<IOperation>();
+            list.AddRange(operationModel); list.AddRange(eoperationModel);
+            list.OrderByDescending(e => e.Id);
+            return list;
         }
+
 
         // GET: api/Operations/5
         [HttpGet("{id}")]
         public async Task<ActionResult<OperationModel>> GetOperationModel(int id)
         {
             var operationModel = await _context.Operations.Include(o => o.Recipient).ThenInclude(r => r.User).Include(o => o.Sender).ThenInclude(r => r.User).FirstOrDefaultAsync(o => o.Id == id);
+
+            if (operationModel == null)
+            {
+                return NotFound();
+            }
+
+            return operationModel;
+        }
+        // GET: api/Operations/5
+        [HttpGet("External/{id}")]
+        public async Task<ActionResult<ExternalOperationModel>> GetExternalOperationModel(int id)
+        {
+            var operationModel = await _context.ExternalOperations.Include(o=>o.TargetInternalAccount).ThenInclude(r => r.User).FirstOrDefaultAsync(o => o.Id == id);
 
             if (operationModel == null)
             {
@@ -69,7 +87,7 @@ namespace BankApplication.Controllers
             operationModel.OperationDate = DateTime.Now;
             var recipient = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.RecipientId);
             var sender = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.SenderId);
-            if (await _validator.HasUnusedLimit(operationModel) && await _validator.IsTransferAmountCorrect(operationModel) && await _validator.HasDailyAmountUnusedLimit(operationModel))
+            if (await _validator.HasUnusedLimit(operationModel.SenderId) && await _validator.IsTransferAmountCorrect(operationModel.SenderId, operationModel.Value) && await _validator.HasDailyAmountUnusedLimit(operationModel.SenderId, operationModel.Value))
             {
                 if (sender.Balance < operationModel.Value)
                 {
@@ -101,11 +119,8 @@ namespace BankApplication.Controllers
         [HttpPost("ExternalTransfer")]
         public async Task<ActionResult<OperationModel>> MakeExternalTransfer(ExternalOperationModel operationModel)
         {
-            if (operationModel.RecipientId == null)
-                return BadRequest();
-            var recipient = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.RecipientId);
-            var sender = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.SenderId);
-            if (await _validator.HasUnusedLimit(operationModel) && await _validator.IsTransferAmountCorrect(operationModel) && await _validator.HasDailyAmountUnusedLimit(operationModel))
+            var sender = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.TargetInternalAccountId);
+            if (await _validator.HasUnusedLimit(operationModel.TargetInternalAccountId) && await _validator.IsTransferAmountCorrect(operationModel.TargetInternalAccountId,operationModel.Value) && await _validator.HasDailyAmountUnusedLimit(operationModel.TargetInternalAccountId, operationModel.Value))
             {
                 if (sender.Balance < operationModel.Value)
                 {
@@ -113,7 +128,8 @@ namespace BankApplication.Controllers
                 }
                 else
                 {
-                    //TODO
+                    //send request to settlement unit
+                    sender.Balance -= operationModel.Value;
                 }
             }
             else
@@ -123,7 +139,7 @@ namespace BankApplication.Controllers
             _context.ExternalOperations.Add(operationModel); 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetOperationModel", new { id = operationModel.Id }, operationModel);
+            return CreatedAtAction("GetExternalOperationModel", new { id = operationModel.Id }, operationModel);
         }
 
     }

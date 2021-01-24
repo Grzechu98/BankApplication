@@ -14,7 +14,7 @@ namespace BankApplication.SharedLibrary.Models
         public DateTime OperationDate { get; set; }
         public decimal Value { get; set; }
         public int? RecipientId { get; set; }
-        public int? SenderId { get; set; }
+        public int SenderId { get; set; }
         [NotMapped]
         public bool Incoming { get; set; }
         [ForeignKey("RecipientId")]
