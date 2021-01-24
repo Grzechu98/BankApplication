@@ -99,7 +99,7 @@ namespace BankApplication.Controllers
             return CreatedAtAction("GetOperationModel", new { id = operationModel.Id }, operationModel);
         }
         [HttpPost("ExternalTransfer")]
-        public async Task<ActionResult<OperationModel>> MakeExternalTransfer(OperationModel operationModel)
+        public async Task<ActionResult<OperationModel>> MakeExternalTransfer(ExternalOperationModel operationModel)
         {
             if (operationModel.RecipientId == null)
                 return BadRequest();
@@ -120,7 +120,7 @@ namespace BankApplication.Controllers
             {
                 return BadRequest("limits exceeded");
             }
-            _context.Operations.Add(operationModel); 
+            _context.ExternalOperations.Add(operationModel); 
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOperationModel", new { id = operationModel.Id }, operationModel);

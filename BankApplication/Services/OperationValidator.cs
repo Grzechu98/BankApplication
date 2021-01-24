@@ -10,9 +10,9 @@ namespace BankApplication.Services
 {
     public interface IOperationValidator
     {
-        Task<bool> IsTransferAmountCorrect(OperationModel operation);
-        Task<bool> HasUnusedLimit(OperationModel operation);
-        Task<bool> HasDailyAmountUnusedLimit(OperationModel operation);
+        Task<bool> IsTransferAmountCorrect(int Id, decimal value);
+        Task<bool> HasUnusedLimit(int Id);
+        Task<bool> HasDailyAmountUnusedLimit(int Id, decimal value);
     }
     public class OperationValidator : IOperationValidator
     {
@@ -23,41 +23,45 @@ namespace BankApplication.Services
             _context = context;
         }
 
-        public async Task<bool> HasDailyAmountUnusedLimit(OperationModel operation)
-        {
-            var operations = await _context.Operations.Where(e => e.SenderId == operation.SenderId && e.OperationDate >= DateTime.Now.AddDays(-1)).ToListAsync();
-            var settings = await _context.AccountSettings.FirstOrDefaultAsync(e => e.BankAccountId == operation.SenderId);
+        public async Task<bool> HasDailyAmountUnusedLimit(int Id,decimal value)
+        {            
+            var operations = await _context.Operations.Where(e => e.SenderId == Id && e.OperationDate >= DateTime.Now.AddDays(-1)).ToListAsync();
+            var eoperations = await _context.ExternalOperations.Where(e => e.TargetInternalAccountId == Id && e.OperationDate >= DateTime.Now.AddDays(-1)).ToListAsync();
+            var list = new List<IOperation>();
+            list.AddRange(operations); list.AddRange(eoperations);
+            var settings = await _context.AccountSettings.FirstOrDefaultAsync(e => e.BankAccountId == Id);
             decimal total = 0;
             
-            foreach (var item in operations)
+            foreach (var item in list)
             {
                 total += item.Value;
             }
 
             var limit = settings.DailyOperationLimit - total;
-            if (operation.Value <= limit)
+            if (value <= limit)
                 return await Task.FromResult(true);
             else
                 return await Task.FromResult(false);
 
         }
 
-        public async Task<bool> HasUnusedLimit(OperationModel operation)
+        public async Task<bool> HasUnusedLimit(int Id)
         {
-            var operations = await _context.Operations.Where(e => e.SenderId == operation.SenderId && e.OperationDate >= DateTime.Now.AddDays(-1)).ToListAsync();
-            var settings = await _context.AccountSettings.FirstOrDefaultAsync(e => e.BankAccountId == operation.SenderId);
+            var operations = await _context.Operations.Where(e => e.SenderId == Id && e.OperationDate >= DateTime.Now.AddDays(-1)).ToListAsync();
+            var eoperations = await _context.ExternalOperations.Where(e => e.TargetInternalAccountId == Id && e.OperationDate >= DateTime.Now.AddDays(-1)).ToListAsync();
+            var settings = await _context.AccountSettings.FirstOrDefaultAsync(e => e.BankAccountId == Id);
             
-            if (operations.Count < settings.MaxDailyOperationsNumber)
+            if ((operations.Count + eoperations.Count) < settings.MaxDailyOperationsNumber)
                 return await Task.FromResult(true);
             else
                 return await Task.FromResult(false);
         }
 
-        public async Task<bool> IsTransferAmountCorrect(OperationModel operation)
+        public async Task<bool> IsTransferAmountCorrect(int Id, decimal value)
         {
-            var settings = await _context.AccountSettings.FirstOrDefaultAsync(e => e.BankAccountId == operation.SenderId);
+            var settings = await _context.AccountSettings.FirstOrDefaultAsync(e => e.BankAccountId == Id);
 
-            if (operation.Value <= settings.SingleOperationLimit)
+            if (value <= settings.SingleOperationLimit)
                 return await Task.FromResult(true);
             else
                 return await Task.FromResult(false);
