@@ -1,0 +1,134 @@
+﻿@page "/newoperation"
+@page "/newoperation/{id:int}/{typepar}"
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@inject IUserManagmentService UserManagmentService
+@inject NavigationManager NavigationManager
+@inject IAlertService AlertService
+@inject ILocalStorageService LocalStorageService
+@inject IApiComunicationService ApiComunicationService
+<LoggedNav></LoggedNav>
+<div class="container-fluid p-5">
+    <div class="d-flex justify-content-center row">
+        <div class="col-xl-6">
+            <div class="card">
+                <h4 class="card-header">@Type</h4>
+                <div class="card-body">
+                        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+                            <DataAnnotationsValidator />
+
+                            <div class="form-group">
+                                <label>Tytuł przelewu</label>
+                                <InputText @bind-Value="model.Title" class="form-control" />
+                                <ValidationMessage For="@(() => model.Title)" />
+                            </div>
+                            <div class="form-group">
+                                <label>Kwota</label>
+                                <InputNumber @bind-Value="model.Value" class="form-control" />
+                                <ValidationMessage For="@(() => model.Value)" />
+                            </div>
+                            <p>Dane odbiorcy:</p>
+                            <div class="form-group">
+                                <label>Nr Konta:</label>
+                                <InputText @bind-Value="model.RecipientAccountNumber" class="form-control" />
+                                <ValidationMessage For="@(() => model.RecipientAccountNumber)" />
+                            </div>
+                            <div class="form-group">
+                                <label>Imie i nazwisko:</label>
+                                <InputText @bind-Value="FullName" class="form-control" />
+                                <ValidationMessage For="@(() => FullName)" />
+                            </div>
+                            <button disabled="@loading" class="btn btn-primary">
+                                @if (loading)
+                                {
+                                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                                }
+                                Zatwierdź
+                            </button>
+                        </EditForm>
+                    </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [Parameter]
+    public string TypePar { get; set; }
+    public string Type { get; set; }
+    public string FullName { get; set; }
+    public IOperation model { get; set; }
+    private bool loading;
+
+    protected override async void OnInitialized()
+    {
+        if (TypePar.Equals("internal"))
+        {
+            Type = "Przelew Wewnętrzny";
+            model = new OperationModel();
+        }
+        else if(TypePar.Equals("external"))
+        {
+            Type = "Przelew Zewnętrzny";
+        }
+        StateHasChanged();
+    }
+
+
+    private async Task OnValidSubmit()
+    {
+        AlertService.Clear();
+        loading = true;
+        try
+        {
+            if (Type.Equals("Przelew Zewnętrzny"))
+            {
+                ExternalOperationModel operationModel = model as ExternalOperationModel;
+                operationModel.FullName = FullName;
+                operationModel.TargetInternalAccountId = Id;
+                operationModel.Type = Type;
+                try
+                {
+                    await ApiComunicationService.Post<ExternalOperationModel>(Configuration["BaseUrl"] + "Operations/ExternalTransfer", operationModel);
+                    AlertService.Success("Przelew przyjęty do realizacji!");
+                    await Task.Delay(800);
+                    NavigationManager.NavigateTo("dashboard");
+                }
+                catch (Exception)
+                {
+                    AlertService.Error("Przelew odrzucony - sprawdź poprawność danych");
+                }
+
+            }
+            else
+            {
+                OperationModel operationModel = model as OperationModel;
+                operationModel.SenderId = Id;
+                operationModel.Type = Type;
+                try
+                {
+                    await ApiComunicationService.Post<OperationModel>(Configuration["BaseUrl"] + "Operations/InternalTransfer", operationModel);
+                    AlertService.Success("Przelew przyjęty do realizacji!");
+                    await Task.Delay(800);
+                    NavigationManager.NavigateTo("dashboard");
+                }
+                catch (Exception)
+                {
+                    AlertService.Error("Przelew odrzucony - sprawdź poprawność danych");
+                }
+
+            }
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+
+            loading = false;
+            StateHasChanged();
+        }
+
+    }
+    }

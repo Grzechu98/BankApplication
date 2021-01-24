@@ -66,11 +66,5 @@ namespace BankApplication.Services
             else
                 return await Task.FromResult(false);
         }
-
-        private bool IsDateBetween(DateTime date)
-        {
-            bool a = date >= DateTime.Now.AddDays(-1) && date <= DateTime.Now;
-            return a;
-        }
     }
 }

@@ -28,6 +28,40 @@
     </div>
 </div>
 
+<div class="modal @ModalClassEx" tabindex="-1" role="dialog" style="display:@ModalDisplayEx">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Szczegóły przelewu</h5>
+            </div>
+            <div class="modal-body">
+                <h5>Tytuł: @ExternalOperation.Title</h5>
+                <br />
+                <h5>Data: @ExternalOperation.OperationDate</h5>
+                <br />
+                <h5>Kwota: @ExternalOperation.Value</h5>
+                <br />
+                @if (ExternalOperation.Incoming)
+                {
+                    <h6>Nadawca: @ExternalOperation.FullName</h6>
+                    <br />
+                    <h6>Odbiorca: @SenderName</h6>
+                }
+                else {
+                <h6>Nadawca: @SenderName</h6>
+                <br />
+                <h6>Odbiorca: @ExternalOperation.FullName</h6>
+                <br />
+                }
+                <h6>Typ: @ExternalOperation.Type</h6>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Zamknij</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if (ShowBackdrop)
 {
     <div class="modal-backdrop fade show"></div>
@@ -37,9 +71,13 @@
     public Guid Guid = Guid.NewGuid();
     public string ModalDisplay = "none;";
     public string ModalClass = "";
+
+    public string ModalClassEx = "";
+    public string ModalDisplayEx = "none;";
     public bool ShowBackdrop = false;
 
     private OperationModel Operation { get; set; } = new OperationModel();
+    private ExternalOperationModel ExternalOperation { get; set; } = new ExternalOperationModel();
     private string SenderName { get; set; }
     private string RecipientName { get; set; }
 
@@ -54,10 +92,23 @@
         StateHasChanged();
     }
 
+    public async void OpenForExternal(int id)
+    {
+        await GetExternalOperation(id);
+        SenderName = ExternalOperation.TargetInternalAccount.User.Name + " " + ExternalOperation.TargetInternalAccount.User.Secondname;
+        RecipientName = ExternalOperation.FullName;
+        ModalDisplayEx = "block;";
+        ModalClassEx = "Show";
+        ShowBackdrop = true;
+        StateHasChanged();
+    }
+
     public void Close()
     {
         ModalDisplay = "none";
         ModalClass = "";
+        ModalDisplayEx = "none";
+        ModalClassEx = "";
         ShowBackdrop = false;
         StateHasChanged();
     }
@@ -65,5 +116,10 @@
     public async Task GetOperation(int id)
     {
         Operation = await ApiComunicationService.Get<OperationModel>(Configuration["BaseUrl"] + "Operations/"+id);
+    }
+
+    public async Task GetExternalOperation(int id)
+    {
+        ExternalOperation = await ApiComunicationService.Get<ExternalOperationModel>(Configuration["BaseUrl"] + "Operations/External/" + id);
     }
 }

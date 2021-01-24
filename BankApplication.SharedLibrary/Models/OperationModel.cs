@@ -13,6 +13,7 @@ namespace BankApplication.SharedLibrary.Models
         public string Title { get; set; }
         public DateTime OperationDate { get; set; }
         public decimal Value { get; set; }
+        public string RecipientAccountNumber { get; set; }
         public int? RecipientId { get; set; }
         public int SenderId { get; set; }
         [NotMapped]

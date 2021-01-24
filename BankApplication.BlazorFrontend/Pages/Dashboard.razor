@@ -8,6 +8,7 @@
 @inject IApiComunicationService ApiComunicationService
 
 <LoggedNav></LoggedNav>
+<OperationTypeModal @ref="Modal"></OperationTypeModal>
 <div class="container-fluid p-5">
     <h1>Witaj, @User.Name</h1>
     <br />
@@ -32,7 +33,7 @@
                             @if (item.IsActive)
                             {
                                 <li class="list-group-item"><h5>Saldo: @item.Balance</h5></li>
-                                <li class="list-group-item"><a href="operations/newtransfer/@item.Id" class="btn btn-link">Nowy przelew</a><a href="operations/@item.Id" class="btn btn-link">Historia operacji</a><a href="account/limits/@item.Id" class="btn btn-link">Zmiana limitów</a><button  @onclick="() => CloseAccount(item.Id)" class="btn btn-link">Zamknij rachunek</button></li>
+                                <li class="list-group-item"><a href="newoperation/@item.Id/internal" class="btn btn-link">Nowy przelew wewnętrzny</a><a href="newoperation/@item.Id/exnternal" class="btn btn-link">Nowy przelew zewnętrzny</a><a href="operations/@item.Id" class="btn btn-link">Historia operacji</a><a href="account/limits/@item.Id" class="btn btn-link">Zmiana limitów</a><button  @onclick="() => CloseAccount(item.Id)" class="btn btn-link">Zamknij rachunek</button></li>
                             }
                             else
                             {
@@ -52,6 +53,7 @@
 @code {
     private Models.StorageUserModel User { get; set; } = new Models.StorageUserModel();
     private IEnumerable<BankAccountModel> BankAccounts { get; set; } = new List<BankAccountModel>();
+    private OperationTypeModal Modal { get; set; }
 
     protected override async void OnInitialized()
     {
@@ -67,7 +69,7 @@
         StateHasChanged();
         AlertService.Success("Pomyślnie utworzono nowy rachunek");
     }
-   
+
     public async void CloseAccount(int Id)
     {
         await ApiComunicationService.Put(Configuration["BaseUrl"] + "BankAccounts/CloseAccount/"+Id, null);

@@ -14,7 +14,7 @@ namespace BankApplication.SharedLibrary.Models
         public decimal Value { get; set; }
         public bool Incoming { get; set; }
         public string FullName { get; set; }
-        public string ExternalAccountNumber { get; set; }
+        public string RecipientAccountNumber { get; set; }
         public int TargetInternalAccountId { get; set; }
         [ForeignKey("TargetInternalAccountId")]
         public virtual BankAccountModel TargetInternalAccount { get; set; }

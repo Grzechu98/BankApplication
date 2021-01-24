@@ -27,7 +27,7 @@
                     <tbody>
                         @foreach (var item in AccountOperations)
                         {
-                         <tr>
+                        <tr>
                             <td>@item.Type</td>
                             <td>@item.Title</td>
                             <td>@item.OperationDate</td>
@@ -39,8 +39,15 @@
                             {
                                 <td style="color:red;">-@item.Value</td>
                             }
-                            <td><button @onclick="() => Modal.Open(item.Id)" class="btn btn-link">Szczegóły</button></td>
-                         </tr>
+                            @if (item.Type.Equals("Przelew Zewnętrzny"))
+                            {
+                                <td><button @onclick="() => Modal.OpenForExternal(item.Id)" class="btn btn-link">Szczegóły</button></td>
+                            }
+                            else { 
+                                <td><button @onclick="() => Modal.Open(item.Id)" class="btn btn-link">Szczegóły</button></td>
+                                }
+                            
+                        </tr>
                         }
                     </tbody>
                 </table>
@@ -56,11 +63,11 @@
 
     private OperationDetailsModal Modal { get; set; }
 
-    private IEnumerable<OperationModel> AccountOperations { get; set; } = new List<OperationModel>();
+    private IEnumerable<IOperation> AccountOperations { get; set; } = new List<IOperation>();
 
     protected override async void OnInitialized()
     {
-        AccountOperations = await ApiComunicationService.Get<IEnumerable<OperationModel>>(Configuration["BaseUrl"] + "Operations");
+        AccountOperations = await ApiComunicationService.Get<IEnumerable<OperationHelper>>(Configuration["BaseUrl"] + "Operations");
         StateHasChanged();
     }
 }

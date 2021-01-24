@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BankApplication.SharedLibrary.Models
 {
-    public interface IOperation
+    public class OperationHelper : IOperation
     {
         public int Id { get; set; }
         public string Type { get; set; }
@@ -13,5 +13,9 @@ namespace BankApplication.SharedLibrary.Models
         public decimal Value { get; set; }
         public bool Incoming { get; set; }
         public string RecipientAccountNumber { get; set; }
+        public OperationHelper()
+        {
+
+        }
     }
 }

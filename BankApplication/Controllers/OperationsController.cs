@@ -82,10 +82,9 @@ namespace BankApplication.Controllers
         [HttpPost("InternalTransfer")]
         public async Task<ActionResult<OperationModel>> MakeInternalTransfer(OperationModel operationModel)
         {
-            if (operationModel.RecipientId == null)
-                return BadRequest();
             operationModel.OperationDate = DateTime.Now;
-            var recipient = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.RecipientId);
+            var recipient = await _context.BankAccounts.FirstOrDefaultAsync(e => e.AccountNumber == operationModel.RecipientAccountNumber);
+            operationModel.RecipientId = recipient.Id;
             var sender = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.SenderId);
             if (await _validator.HasUnusedLimit(operationModel.SenderId) && await _validator.IsTransferAmountCorrect(operationModel.SenderId, operationModel.Value) && await _validator.HasDailyAmountUnusedLimit(operationModel.SenderId, operationModel.Value))
             {
@@ -117,7 +116,7 @@ namespace BankApplication.Controllers
             return CreatedAtAction("GetOperationModel", new { id = operationModel.Id }, operationModel);
         }
         [HttpPost("ExternalTransfer")]
-        public async Task<ActionResult<OperationModel>> MakeExternalTransfer(ExternalOperationModel operationModel)
+        public async Task<ActionResult<ExternalOperationModel>> MakeExternalTransfer(ExternalOperationModel operationModel)
         {
             var sender = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.TargetInternalAccountId);
             if (await _validator.HasUnusedLimit(operationModel.TargetInternalAccountId) && await _validator.IsTransferAmountCorrect(operationModel.TargetInternalAccountId,operationModel.Value) && await _validator.HasDailyAmountUnusedLimit(operationModel.TargetInternalAccountId, operationModel.Value))
