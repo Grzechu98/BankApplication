@@ -120,7 +120,7 @@ namespace BankApplication.Controllers
             {
                 return BadRequest("limits exceeded");
             }
-            _context.Operations.Add(operationModel);
+            _context.Operations.Add(operationModel); 
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOperationModel", new { id = operationModel.Id }, operationModel);
