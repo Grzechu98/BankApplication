@@ -33,7 +33,7 @@
                             @if (item.IsActive)
                             {
                                 <li class="list-group-item"><h5>Saldo: @item.Balance</h5></li>
-                                <li class="list-group-item"><a href="newoperation/@item.Id/internal" class="btn btn-link">Nowy przelew wewnętrzny</a><a href="newoperation/@item.Id/external" class="btn btn-link">Nowy przelew zewnętrzny</a><a href="operations/@item.Id" class="btn btn-link">Historia operacji</a><a href="account/limits/@item.Id" class="btn btn-link">Zmiana limitów</a><button  @onclick="() => CloseAccount(item.Id)" class="btn btn-link">Zamknij rachunek</button></li>
+                                <li class="list-group-item"><a href="newoperation/@item.Id/internal" class="btn btn-link">Nowy przelew wewnętrzny</a><a href="newoperation/@item.Id/external" class="btn btn-link">Nowy przelew zewnętrzny</a><a href="operations/@item.Id" class="btn btn-link">Historia operacji</a><a href="limits/@item.Id" class="btn btn-link">Zmiana limitów</a><button  @onclick="() => CloseAccount(item.Id)" class="btn btn-link">Zamknij rachunek</button></li>
                             }
                             else
                             {

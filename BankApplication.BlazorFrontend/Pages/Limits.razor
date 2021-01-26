@@ -1,0 +1,79 @@
+﻿@page "/limits"
+@page "/limits/{id:int}"
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@inject IUserManagmentService UserManagmentService
+@inject NavigationManager NavigationManager
+@inject IAlertService AlertService
+@inject ILocalStorageService LocalStorageService
+@inject IApiComunicationService ApiComunicationService
+<LoggedNav></LoggedNav>
+<div class="container-fluid p-5">
+    <div class="d-flex justify-content-center row">
+        <div class="col-xl-6">
+            <div class="card">
+                <h4 class="card-header">Zmiana limitów transakcji</h4>
+                <div class="card-body">
+                    <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+                        <DataAnnotationsValidator />
+
+                        <div class="form-group">
+                            <label>Maksymalna dzienna suma kwot operacji</label>
+                            <InputNumber @bind-Value="model.DailyOperationLimit" class="form-control" />
+                            <ValidationMessage For="@(() => model.DailyOperationLimit)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Maksymalna dzienna ilość operacji</label>
+                            <InputNumber @bind-Value="model.MaxDailyOperationsNumber" class="form-control" />
+                            <ValidationMessage For="@(() => model.MaxDailyOperationsNumber)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Maksymalna kwota pojedyńczej operacji</label>
+                            <InputNumber @bind-Value="model.SingleOperationLimit" class="form-control" />
+                            <ValidationMessage For="@(() => model.SingleOperationLimit)" />
+                        </div>
+                        <button disabled="@loading" class="btn btn-primary">
+                            @if (loading)
+                            {
+                                <span class="spinner-border spinner-border-sm mr-1"></span>
+                            }
+                            Aktualizuj
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    public AccountSettings model { get; set; }
+    private bool loading;
+    protected override async void OnInitialized()
+    {
+        model = await ApiComunicationService.Get<AccountSettings>(Configuration["BaseUrl"] + "AccountSettings/"+Id);
+        StateHasChanged();
+    }
+    private async Task OnValidSubmit()
+    {
+        AlertService.Clear();
+        loading = true;
+        try
+        {
+            await ApiComunicationService.Put(Configuration["BaseUrl"] + "AccountSettings/" + Id, model);
+            AlertService.Success("Dokonano zmiany limitów!");
+            await Task.Delay(800);
+            NavigationManager.NavigateTo("dashboard");
+        }
+        catch (Exception)
+        {
+
+            AlertService.Error("Zmiana limitów nie powiodła się");
+        }
+        loading = false;
+
+    }
+}
