@@ -86,6 +86,7 @@ namespace BankApplication
             services.AddTransient<IEncrypter, Encrypter>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IOperationValidator, OperationValidator>();
+            services.AddScoped<ISettlementUnitService, SettlementUnitService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

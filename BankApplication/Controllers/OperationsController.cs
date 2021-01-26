@@ -20,11 +20,13 @@ namespace BankApplication.Controllers
     {
         private readonly MainContext _context;
         private readonly IOperationValidator _validator;
+        private readonly ISettlementUnitService _settlementService;
 
-        public OperationsController(MainContext context, IOperationValidator validator)
+        public OperationsController(MainContext context, IOperationValidator validator,ISettlementUnitService settlementService)
         {
             _context = context;
             _validator = validator;
+            _settlementService = settlementService;
         }
 
         [HttpGet]
@@ -47,8 +49,8 @@ namespace BankApplication.Controllers
             }
             var list = new List<IOperation>();
             list.AddRange(operationModel); list.AddRange(eoperationModel);
-            list.OrderByDescending(e => e.Id);
-            return list;
+            
+            return list.OrderByDescending(e => e.OperationDate).ToList(); ;
         }
 
 
@@ -118,6 +120,7 @@ namespace BankApplication.Controllers
         [HttpPost("ExternalTransfer")]
         public async Task<ActionResult<ExternalOperationModel>> MakeExternalTransfer(ExternalOperationModel operationModel)
         {
+            operationModel.OperationDate = DateTime.Now;
             var sender = await _context.BankAccounts.FirstOrDefaultAsync(e => e.Id == operationModel.TargetInternalAccountId);
             if (await _validator.HasUnusedLimit(operationModel.TargetInternalAccountId) && await _validator.IsTransferAmountCorrect(operationModel.TargetInternalAccountId,operationModel.Value) && await _validator.HasDailyAmountUnusedLimit(operationModel.TargetInternalAccountId, operationModel.Value))
             {
@@ -129,6 +132,9 @@ namespace BankApplication.Controllers
                 {
                     //send request to settlement unit
                     sender.Balance -= operationModel.Value;
+                    await _settlementService.PrepareTransfer(operationModel);
+
+                    await _settlementService.SettlementExternalTransfers();
                 }
             }
             else
